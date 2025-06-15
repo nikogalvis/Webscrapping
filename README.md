@@ -12,7 +12,7 @@ Además, por el momento, cumpliremos con una **Feature Extra**, se generaran rep
 Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codigo, este sera el esqueleto del cual partiremos para programar nuestro sistema:
 
 ```mermaid
-  classDiagram
+  classDiagram   
     class WebSites {
         - name: str
         - main_url: str
@@ -41,7 +41,7 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
 
     class Wikipedia {
         - name: str = "Wikipedia"
-        - urlstr: str = "https:// www. wikipedia. org/"
+        - urlstr: str = "https://www.wikipedia.org/"
         + __init__(name, url)
         + search_suggestions(word, language): list[str]
         + create_url(): str
@@ -50,7 +50,7 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
 
     class MercadoLibre {
         - name: str = "Mercado Libre"
-        - urlstr: str = "https:// www. mercadolibre. com. co/"
+        - urlstr: str = "https://www.mercadolibre.com.co/"
         + __init__(name, url)
         + find_data(type, name): str
         + export_document(): Document
@@ -58,7 +58,7 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
 
     class Citizendium {
         - name: str = "Citizendium"
-        - urlstr: str = "https:// www. citizendium. org/"
+        - urlstr: str = "https://www.citizendium.org/"
         + __init__(name, url)
         + create_url(): str
         + export_document(): Document
@@ -134,3 +134,7 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
     %% Relaciones de composición
     WebSites "1" o-- "*" Data
     WebSites "1" o-- "1" Document
+```
+##Solución Preliminar
+Haremos un codigo, el cual sea capaz de recopilar informacion util de disntintas paginas web, ya sean wikis o paginas de compra, y retornar toda esta información, de manera organizada, en un documento, apto para la lectura y analisis de la misma.
+
