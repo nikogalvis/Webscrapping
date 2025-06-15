@@ -135,6 +135,6 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
     WebSites "1" o-- "*" Data
     WebSites "1" o-- "1" Document
 ```
-##Solución Preliminar
+## Solución Preliminar
 Haremos un codigo, el cual sea capaz de recopilar informacion util de disntintas paginas web, ya sean wikis o paginas de compra, y retornar toda esta información, de manera organizada, en un documento, apto para la lectura y analisis de la misma.
 
