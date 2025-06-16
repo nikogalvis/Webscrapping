@@ -193,9 +193,9 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
     WebSites "1" o-- "1" Document
 ```
 ## Solución Preliminar
-Haremos un codigo, el cual sea capaz de recopilar informacion util de disntintas paginas web, ya sean wikis o paginas de compra, y retornar toda esta información, de manera organizada, en un documento, apto para la lectura y analisis de la misma.
+La Solución que planteamos para esta alternativa, es un programa el cual sea capaz de recopilar informacion util de distintas paginas web, ya sean estaticas o dinamicas, y retornar toda esta información a conveniencia del usuario.
 
-Además, como **Feature Extra**, se generaran reportes en forma de documentos de la información recopilada de estos sitios, para darle mas profesionalismo a nuestro programa.
+Además, como **Feature Extra**, se generaran reportes en forma de documentos de la información recopilada de estos sitios, como se puede observar en el diagrama de clases, este documento cambiara dependiendo del tipo de datos recolectados, esto para darle una mayor estetica y legibilidad al resultado.
 
 ### **Consideraciones legales del web scraping**
 El web scraping no es ilegal por sí mismo. Sin embargo, se deben tener en cuenta los permisos que la página web que se intenta manipular otorgue, los cuales están determinados en los **términos y condiciones**. Es necesario tener cuidado con lo que se intenta scrapear, la ley 1581 de 2012, también conocida como la **Ley de protección de datos personales**, establece parámetros que se deben cumplir al momento de manipular datos privados de cualquier individuo, los cuales abarcan el consentimiento, la finalidad, y la garantía de su seguridad.
