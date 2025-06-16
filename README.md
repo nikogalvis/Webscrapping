@@ -3,11 +3,14 @@
 Este grupo de nombre **Bizarre Coding Adventure** conformado por las personas **Juan Sebastian Peñuela Duran**,
 **Nicolas Steven Galvis Ordoñez** y **Andres Arturo Lozano Olivares** realizará la alternativa 2 **(Sistema de Web Scraping)**
 
-
 ### Definición de alternativa
-Un sistema de Webscrapping, es una manera de extraer información de paginas en linea, de manera automatizada, (Algo asi como un copiar y pegar mucho mas eficiente), y con estos datos recolectados, se organizan y se presentan de otra forma, ya sea json, csv, Excel, etc. Este sistema tiene diversos usos, ya sea el monitoreo de precios (De acciones, aplicaciones, juegos, indumentaria, etc), o monitorear las paginas en internet de entidades de interes propio, como se puede observar, la principar funcion de este sistema, es **recopilar información** que pueda ser de utilidad para quien la necesite. En este caso, se extraera información de paginas web estaticas, como lo son las **wikis**, y de paginas web de sitios de retail, como lo puede ser **mercado libre** o **airbnb**.
+Un sistema de web scraping es una herramienta que permite extraer datos de sitios web de forma automática (Algo así como un copiar y pegar mucho más eficiente). Estos datos se estructuran y se presentan en formatos como: JSON, CSV, Excel, etc.
+Este sistema es utilizado en actividades como el monitoreo de precios (acciones, aplicaciones, juegos, indumentaria, etc), monitoreo de páginas en internet de interés propio o colectivo, estudios poblacionales y estadísticos, entre otros. En resumen, la función de un sistema de web scraping es **recopilar datos**, con los cuales es común construir información para satisfacer la necesidad y el interés del usuario. En este caso, se busca extraer datos de páginas web estáticas, como lo son las **wikis**, y de paginas web de sitios de retail, como **Mercado libre** o **Airbnb**.
 
-Además, por el momento, cumpliremos con una **Feature Extra**, se generaran reportes en forma de documentos de la información recopilada de estos sitios, para darle mas profesionalismo a nuestro programa.
+Además, como **Feature Extra**, se generaran reportes en forma de documentos de la información recopilada de estos sitios, para darle mas profesionalismo a nuestro programa.
+
+**Consideraciones legales del web scraping**
+El web scraping no es ilegal por sí mismo. Sin embargo, se deben tener en cuenta los permisos que la página web que se intenta manipular otorgue, los cuales están determinados en los **términos y condiciones**. Es necesario tener cuidado con lo que se intenta scrapear, la ley 1581 de 2012, también conocida como la **Ley de protección de datos personales**, establece parámetros que se deben cumplir al momento de manipular datos privados de cualquier individuo, los cuales abarcan el consentimiento, la finalidad, y la garantía de su seguridad.
 
 ## Diagrama de clases
 
