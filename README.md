@@ -4,7 +4,7 @@ Este grupo de nombre **Bizarre Coding Adventure** conformado por las personas **
 
 
 ### Definición de alternativa
-Un sistema de Webscrapping, es una manera de extraer información de paginas en linea, de manera automatizada, (Algo asi como un copiar y pegar mucho mas eficiente), esto aprovechando la estructura html de las páginas web para raspar datos según su etiqueta, estos datos son alamcenados para su posterior exportación por medio de distintos tipos de documentos). Estos datos ya obtenidos se pueden usar de distintas maneras, ya sea el monitoreo de precios (De acciones, aplicaciones, juegos, indumentaria, etc), o monitorear las paginas en internet de entidades de interes propio.
+Un sistema de Webscrapping, es una manera de extraer datos de paginas en linea, de manera automatizada, (Algo asi como un copiar y pegar mucho mas eficiente), esto aprovechando la estructura html de las páginas web para raspar datos según su etiqueta, estos datos son almacenados para su posterior exportación por medio de distintos tipos de documentos). Estos datos ya obtenidos se pueden usar de distintas maneras, ya sea el monitoreo de precios (De acciones, aplicaciones, juegos, indumentaria, etc), o monitorear las paginas en internet de entidades de interes propio.
 
 Como se puede observar, la principal función de este sistema, es **recopilar información** que pueda ser de utilidad para el usuario.
 
