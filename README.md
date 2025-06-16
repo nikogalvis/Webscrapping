@@ -27,8 +27,8 @@ Como se puede observar, la principal función de este sistema, es **recopilar in
       
 ```
 Esta forma resulta muy sencilla dependiendo del tipo de web, ya que existen algunas páginas que presentan más dificultades al momento de realizar Web Scraping. Así, se pueden clasificar las páginas web en dos tipos cuya característica resulta ser clave para scrapear datos:
-- Webs estáticas: Su contenido es igual para todo usuario y solo se puede cambiar manualmente.
-- Web dinámicas: Su contenido cambia dependiendo del tipo de usuario y la interacción con los datos.
+- **Webs estáticas**: Su contenido es igual para todo usuario y solo se puede cambiar manualmente.
+- **Web dinámicas**: Su contenido cambia dependiendo del tipo de usuario y la interacción con los datos.
 
 Estas últimas requieren pasos extra dada su forma de cargar información (envía un html básico que puede estar vacío o falto de información y luego se genera contenido de manera dinámica). Estos pasos consisten en:
 - Simular un navegador que acceda a la página y esperar que cargue el contenido.
@@ -188,14 +188,36 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
     Document <|-- DocumentWord
     Document <|-- DocumentExcel
 
-    %% Relaciones de composición
     WebSites "1" o-- "*" Data
     WebSites "1" o-- "1" Document
 ```
 ## Solución Preliminar
-La Solución que planteamos para esta alternativa, es un programa el cual sea capaz de recopilar datos utiles de distintas paginas web, ya sean estaticas o dinamicas, y retornar toda esta información a conveniencia del usuario.
+La Solución que planteamos para esta alternativa, es un programa el cual sea capaz de recopilar datos utiles de distintas paginas web previamente escogidas, dando una perosanalización al modo y vista de los datos según que página y dependiendo de los permisos de la misma se pueden realizar métodos para mejorar la experiencia del usuario que use el programa.
 
-Además, como **Feature Extra**, se generaran reportes en forma de documentos los datos requeridos de estos sitios, como se puede observar en el diagrama de clases, este documento cambiara dependiendo del tipo de datos recolectados, esto para darle una mayor estetica y legibilidad al resultado.
+### Funcionamiento del scrapeo de datos
+Se caracteriza cada página (tres en este caso siendo Wikipedia, Mercado Libre y Citizendium) haciendo reconocimiento del tipo, sus etiquetas y sus clases. Una vez reconocidas a sabidas sus restricciones se pueden crear diferentes fomras facilitar el uso y mejorar la experiencia del usuario (Se crean formas de mejorar la experiencia del usuario dependiendo de la página).
+
+***(Ejemplo: El API de wikipedia nos permite crear un generador de url automáticos para poder buscar urls relacionadas entre si y mejorar la experiencia de busqueda de datos, esto solicitando información a la página con respecto a búsquedas relacionadas entre si. Por otro lado Citizendium posee muchas más restricciones por lo que estos posibles métodos no son posibles de manera convencional.)***
+
+### Generador de documentos
+Como **Feature Extra**, se generan reportes en forma de documentos los datos requeridos de estos sitios, como se puede observar en el diagrama de clases. Estos documento son personalizables dependiendo del tipo de dato y las exigencias del usuarios **(se crea la clase Data y sus sub-clases para realizar una caracterización más profunda. Se crea la clase Documents y sub-clases, estos poseen sus métodos para la organización de los datos en los respectivos documentos según el tipo de dato y la solicitud del usuario)**.
+
+### Interfaz gráfica
+A modo de app para computador. Método de elaboración aún no definido.
+
+### Paquetes y módulos
+(La siguiente presentación es la general y puede tener cambios considerables):
+```
+  > scraping_project
+    > exceptions
+    > moduls
+      > moduls_scraping
+      > moduls_documnetation
+    > gui
+  - terms_conditions.txt
+  - main.py
+```
+***(Esta muestra solo es una guia para el entendimiento y elaboración del programa y no se le debe dar demasiada importancia)***
 
 ### **Consideraciones legales del web scraping**
 El web scraping no es ilegal por sí mismo. Sin embargo, se deben tener en cuenta los permisos que la página web que se intenta manipular otorgue, los cuales están determinados en los **términos y condiciones**. Es necesario tener cuidado con lo que se intenta scrapear, la ley 1581 de 2012, también conocida como la **Ley de protección de datos personales**, establece parámetros que se deben cumplir al momento de manipular datos privados de cualquier individuo, los cuales abarcan el consentimiento, la finalidad, y la garantía de su seguridad.
