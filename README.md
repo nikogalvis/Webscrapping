@@ -73,6 +73,7 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
     class WebSites {
         - name: str
         - main_url: str
+        - data: dict[Data]
         + __init__(name, url)
         + set_html(html, url): str
         + beautiful_soup(html, type_data): Data
@@ -82,6 +83,7 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
         + set_url(new_url, password): str
         - save_data()
         - reset_data()
+        - delete_data()
         + export_document(): Document
     }
 
