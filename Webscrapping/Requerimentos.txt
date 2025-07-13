@@ -1,0 +1,23 @@
+## Estructuración de los Paquetes
+
+Para empezar, nuestro projecto sera una sola carpeta, llamada "Webscrapping", adentro del cual iran distintas carpetas más pequeñas
+cada una de las cuales sera un paquete distinto, los que llevamos hasta ahora son:
+
+- Static Web
+- Dynamic Web
+- Data
+- Document
+
+Estas carpetas deben nombrarse descriptivamente, sin usar guiones de ningun tipo, y nombrandolas en minuscula, cada uno de los codigos
+debe comentarse adecuadamente, Cada uno de estos paquetes debe tener su propio archivo "__init__.py", 
+con el codigo de inicialización de paquete
+
+Los modulos de cada uno de esos paquetes, debe estar dividido en funciones y clases, cada una de ellas tiene una utilidad 
+especifica para nosotros.
+
+La documentación es una guia tanto para nosotros como para el profesor, hay q asegurarnos de comentar correctamente el mismo.
+
+Aunque es más comodo programar a la carrera, es mejor seguir las convenciones pep8, de todas formas, al "terminar", 
+tenemos que verificar que 
+nuestro proyecto cumpla con esta documentación.
+  
