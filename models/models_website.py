@@ -23,7 +23,7 @@ class WebSites:
         self.__name = name
         self.__url = url
         self.__html = ""
-        self.__data = {}
+        self._data = {}
         self.__password = "HollowKnight"
 
     def set_html(self, html: str, url: str):
@@ -90,22 +90,22 @@ class WebSites:
         """
         Save the data recolected
         """
-        self.__data[data.get_title()] = data
+        self._data[data.get_title()] = data
 
     def reset_data(self):
         """
         Reset the recolected data
         """
-        self.__data = {}
+        self._data = {}
         
     def save_data_in_json(self, file_name):
         """      
-        Sends the data stored in self.__data to a specified .json
+        Sends the data stored in self._data to a specified .json
         """
         if not os.path.exists(f"data_json/{file_name}.json"):
             raise FileNotFoundError(f"{file_name}.json not exists")
         path = f"data_json/{file_name}.json"
-        dict_data = {title : data.to_dict() for title, data in self.__data.items()}
+        dict_data = {title : data.to_dict() for title, data in self._data.items()}
         try:
             with open(path, "w", encoding="utf-8") as f:
                 json.dump(dict_data, f, indent=4, ensure_ascii=False)
