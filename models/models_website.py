@@ -4,12 +4,18 @@ data scraping
 """
 from bs4 import BeautifulSoup
 from selenium import webdriver
+import requests
 import json
 import os
+import time
+
+from selenium.webdriver.firefox.options import Options as Opt_firefox
+from selenium.webdriver.chrome.options import Options as Opt_chrome
+from selenium.webdriver.edge.options import Options as Opt_edge
 
 from models_data import Data
 
-class WebSites:
+class WebPage:
     """
     Base class
     Store HTML, prepare it to the subclasses
@@ -22,58 +28,66 @@ class WebSites:
         """
         self.__name = name
         self.__url = url
-        self.__html = ""
+        self.__html = "" 
         self._data = {}
-        self.__password = "HollowKnight"
 
-    def set_html(self, html: str, url: str):
+    #This variable corresponds to the readable HTML and not the one obtained directly
+    @property
+    def html(self):
         """
-        Save the HTML of a page, 
-        and update the URL that we are working
+        keep the html readable
         """
-        self.__html = html
-        self.__url = url
+        return self.__html
         print("HTML was succefully saved")
 
-    def beautiful_soup(self, html):
+    @html.setter
+    def html(self, new_html: str):
         """
-        Parser the HTML, and prepare "soup" for other subclasses
+        Change the readable html
         """
-        soup = BeautifulSoup(html, "lxml")
-        print("The soup is ready!")
-        return soup
+        self.__html = new_html
 
-    def get_name(self)-> str:
+    def beautiful_soup(self):
+        """
+        Parser the HTML of the web page, and prepare "soup" for other subclasses
+        """
+        raise NotImplementedError("Subclasses must implement the beatiful_soup() method")
+
+    def reset_html(self):
+        """
+        leave the html empty
+        """
+        self.__html = ""
+
+    @property
+    def name(self)-> str:
         """
         Get the name of the page
         """
         return self.__name
     
-    def set_name(self, new_name: str, password: str):
+    @name.setter
+    def name(self, new_name: str):
         """
         Check the password, and change the name of the page
         """
-        if (password == self.__password):
-            self.__name = new_name
-            print("The name was updated")
-        else:
-            print("Wrong Password")
-    
-    def get_url(self) -> str:
+        self.__name = new_name
+        print("The name was updated")
+
+    @property
+    def url(self) -> str:
         """
         Return the name of the page
         """
         return self.__url
     
-    def set_url(self, new_url: str, password: str):
+    @url.setter
+    def url(self, new_url: str):
         """
         Check the password, and set a new url
         """
-        if (password == self.__password):
-            self.__url = new_url
-            print("The url was updated")
-        else:
-            print("Wrong Password")
+        self.__url = new_url
+        print("The url was updated")
     
     def create_json(self, name_json: str):
         """     
@@ -97,7 +111,7 @@ class WebSites:
         Reset the recolected data
         """
         self._data = {}
-        
+
     def save_data_in_json(self, file_name):
         """      
         Sends the data stored in self._data to a specified .json
@@ -114,38 +128,96 @@ class WebSites:
             print("One or more objects are not serializable.")
 
 
-class StaticWeb(WebSites):
+class StaticWeb(WebPage):
     """
     subclass for websites that do not use JavaScript
     """
     def __init__(self, name: str, url: str):
         """
-        Starts the page with a name and URL, and create a Password
+        Starts the page with a name and URL
         """
         super().__init__(name, url)
 
-class DinamicWeb(WebSites):
-    def __init__(self, name, url):
+    def beautiful_soup(self):
         """
-        subclass for websites that do use JavaScript
+        Parser the HTML, and prepare "soup" for static websites
+        """
+        html = requests.get(self.url).text
+        bs = BeautifulSoup(html, "lxml")
+        self.html = bs
+        print("The soup is ready!")
+        return bs
+
+class DinamicWeb(WebPage):
+    """
+    subclass for websites that do use JavaScript
+    """
+    def __init__(self, name: str, url: str):
+        """
+        Starts the page with a name and URL
         """
         super().__init__(name, url)
         self.__driver = None
     
-    supported = {
-            "chrome": webdriver.Chrome,
-            "firefox": webdriver.Firefox,
-            "edge": webdriver.Edge
+    supported_drivers = {
+            "Chrome": webdriver.Chrome,
+            "Firefox": webdriver.Firefox,
+            "Edge": webdriver.Edge
         }
 
-    def access_browser(self, browser: str):
-            """
-            Initializes the browser driver based on the specified browser name.
-            Supported browsers: 'chrome', 'firefox', 'edge'
-            """
-            browser = browser.lower() #Change everything to lowercase
-            if browser in self.supported:
-                    self.__driver = self.supported[browser]()
-                    print(f"{browser.capitalize()} driver started successfully.")
-            else:
-                print(f"Browser '{browser}' not supported.")
+    @property
+    def driver(self):
+        """
+        returns the browser that opens the dynamic page
+        """
+        return self.__driver
+
+    @driver.setter
+    def driver(self, new_driver):
+        """
+        Change the browser driver based on the specified browser name.
+        Supported browsers: 'chrome', 'firefox', 'edge'
+        """
+        new_driver = new_driver.lower()
+        new_driver = new_driver.capitalize() #Change everything to lowercase
+        if new_driver in self.supported_drivers:
+            self.__driver = self.supported_drivers[new_driver]
+            print(f"{new_driver} driver started successfully.")
+        else:
+            print(f"Browser '{new_driver}' not supported.")
+
+
+    def hide_page(self, browser):
+        """
+        Hide the page that is automated with .page_source
+        """
+        browser = browser.lower()
+        if browser == "chrome":
+            options = Opt_chrome()
+        elif browser == "edge":
+            options = Opt_edge()
+        elif browser == "firefox":
+            options = Opt_firefox()
+            options.headless = True
+            return options
+        else:
+            print(f"Browser '{browser}' not supported.")
+            return
+        options.add_argument("--headless")
+        return options
+
+    #page load time
+    load_time = 10
+
+    def beautiful_soup(self):
+        """
+        Parser the HTML, and prepare "soup" for dinamic websites
+        """
+        driver = self.driver()
+        driver.get(self.url)
+        time.sleep(self.load_time)
+        html = driver.page_source
+        bs = BeautifulSoup(html, "lxml")
+        print("The soup is ready!")
+        self.html = bs
+        return bs

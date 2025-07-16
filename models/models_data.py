@@ -11,52 +11,48 @@ class Data:
         """
         self.__title = title
         self.__type_tag = type_tag
-        self._data = {}
-        self.__password = "HollowKnight" #Posibles cambios al manejo de la password
+        self.__data = {}
 
     def add_data_web(self, data):
         """
         Set the internal data directly (used in subclasses)
         """
-        self._data = data
+        self.__data = data
 
-    def get_type(self) -> str:
+    @property
+    def type(self) -> str:
         """
         Return the type of the data
         """
         return self.__type_tag
 
-    def set_type(self, new_type_tag:dict, password:str) -> str:
+    @type.setter
+    def type(self, new_type_tag:dict) -> str:
         """
-        Update the type if password is correct
+        Update the type
         """
-        if password == self.__password:
-            self.__type_tag = new_type_tag
-        else:
-            print("Invalid password")
+        self.__type_tag = new_type_tag
 
-    def get_data(self, password: str):
+    @property
+    def data(self, password: str):
         """
         Return the stored data if password is correct
         """
-        if password == self.__password:
-            return self._data
-        return "Access denied"
+        return self._data
 
-    def get_title(self) -> str:
+    @property
+    def title(self) -> str:
         """
         Return the title of the data
         """
         return self.__title
 
-    def set_title(self, new_title: str, password: str) -> str:
+    @title.setter
+    def title(self, new_title: str) -> str:
         """
-        Update the title if the password is correct
+        Update the title
         """
-        if password == self.__password:
-            self.__title = new_title
-        else:
-            print("Invalid password")
+        self.__title = new_title
 
     def to_dict(self)-> dict:
         """      
@@ -65,7 +61,7 @@ class Data:
         dictionary = {
             "title" : self.__title,
             "type_tag" : self.__type_tag,
-            "data" : self._data
+            "data" : self.__data
         }
         return dictionary
 
@@ -82,7 +78,7 @@ class Data:
             elif t.name == "img":
                 obj = DataImage(title_, class_)
                 obj.add_data_web(t)
-            elif t.name in ["p", "b", "h1", "h2", "h3", "h4", "h5", "h6",]:
+            elif t.name in ["p", "b", "h1", "h2", "h3", "h4", "h5", "h6", "span"]:
                 obj = DataText("text", {"tag" : t.name, "class" : class_})
                 obj.add_data_web(t)
             elif t.name in ["div", "section", "article", "nav", "header", "footer"]:
@@ -111,7 +107,7 @@ class DataImage(Data):
         receives the part of the HTML corresponding to tag <img> and return the
         src attribute
         """
-        self._data = data_img.get("src")
+        self.data[self.title] = data_img.get("src")
 
 
 class DataUrl(Data):
@@ -129,7 +125,7 @@ class DataUrl(Data):
         receives the part of the HTML corresponding to tag <a> and return the
         href attribute
         """
-        self._data = data_url.get("href")
+        self.data[self.title] = data_url.get("href")
 
 
 class DataTable(Data):
@@ -180,7 +176,13 @@ class DataText(Data):
         receives the part of the HTML corresponding to the text and return the
         total text
         """
-        self._data = data_text.get_text(strip=True)
+        self.data[self.title] = data_text.get_text(strip=True)
+
+    def add_data_text(self, text: str):
+        """      
+        receive the text directly and save it
+        """
+        self.data[self.title] = text
 
 
 class DataList(Data):
@@ -197,10 +199,10 @@ class DataList(Data):
         """
         Receives an HTML <ul> or <ol> element and parses each <li> tag
         """
-        self._data = {}
+        self.data = {}
         i = 0
         for li in list_html.find_all("li"):
-            self._data[f"li{i}"] = self.extract_sub_data(li)
+            self.data[f"li{i}"] = self.extract_sub_data(li)
             i += 1
 
 
@@ -220,4 +222,4 @@ class DataContainer(Data):
         """
         Receives an HTML of container and parses each sub_tag
         """
-        self._data = self.extract_sub_data(container_html)
+        self.data = self.extract_sub_data(container_html)
