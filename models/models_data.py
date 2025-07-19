@@ -3,6 +3,8 @@ This module references all the data classes obtained from a website's HTML
 They are stored as dictionaries and lists
 """
 from bs4 import BeautifulSoup
+import pandas
+import numpy
 
 class Data:
     def __init__(self, title: str, type_tag:dict = {"tag" : None, "class" : None}):
@@ -11,13 +13,28 @@ class Data:
         """
         self.__title = title
         self.__type_tag = type_tag
-        self.__data = {}
+        self._data = {}
+        self.index = 0
+
+    @property
+    def data(self):
+        """
+        
+        """
+        return self._data
+
+    @data.setter
+    def data(self, new_data):
+        """
+        
+        """
+        self._data = new_data
 
     def add_data_web(self, data):
         """
         Set the internal data directly (used in subclasses)
         """
-        self.__data = data
+        self._data = data
 
     @property
     def type(self) -> str:
@@ -34,11 +51,24 @@ class Data:
         self.__type_tag = new_type_tag
 
     @property
-    def data(self, password: str):
+    def data(self):
         """
         Return the stored data if password is correct
         """
         return self._data
+
+    @data.setter
+    def data(self, new_data):
+        """
+        Update the data
+        """
+        self._data = new_data
+
+    def set_value(self, key, value):
+        if value is not None:
+            self._data[key] = value
+        else:
+            print(f"WARNING: Not setting {key} because value is None")
 
     @property
     def title(self) -> str:
@@ -54,20 +84,13 @@ class Data:
         """
         self.__title = new_title
 
-    def to_dict(self)-> dict:
-        """      
-        Converts data objects into dictionaries for handling in JSON
+    def extract_sub_data(self, container_html, filter_ = None):
         """
-        dictionary = {
-            "title" : self.__title,
-            "type_tag" : self.__type_tag,
-            "data" : self.__data
-        }
-        return dictionary
-
-    def extract_sub_data(self, container_html):
+        For a tag container, create objects for each tag.
+        exception_ is a boolean exception to filter tags
+        """
         sub_data = []
-        for t in container_html.descendants:
+        for t in container_html.find_all(filter_):
             if not hasattr(t, "name") or t.name is None:
                 continue  #Ignore unnecessary text
             class_ = t.get("class")
@@ -75,22 +98,30 @@ class Data:
             if t.name == "a":
                 obj = DataUrl(title_, class_)
                 obj.add_data_web(t)
-            elif t.name == "img":
+            elif t.name in ["img", "figure"]:
                 obj = DataImage(title_, class_)
                 obj.add_data_web(t)
-            elif t.name in ["p", "b", "h1", "h2", "h3", "h4", "h5", "h6", "span"]:
-                obj = DataText("text", {"tag" : t.name, "class" : class_})
+            elif t.name in [
+                "p", "b", "h1", "h2", "h3", "h4", "h5", "h6", "span"]:
+                obj = DataText(f"text_{t.name}_{self.index}", {"tag" : t.name, "class" : class_})
                 obj.add_data_web(t)
-            elif t.name in ["div", "section", "article", "nav", "header", "footer"]:
-                obj = DataContainer("container", {"tag" : t.name, "class" : class_})
-                obj.add_data_web(self.extract_sub_data(t))
             elif t.name in ["ol", "ul"]:
-                obj = DataList("list", {"tag" : t.name, "class" : class_})
-                obj.add_data_web([li.get_text(strip=True) for li in t.find_all("li")])
+                obj = DataList(f"list_{t.name}_{self.index}", {"tag" : t.name, "class" : class_})
+                obj.add_data_web(t)
+            elif t.name == "table":
+                obj = DataTable(f"table_{t.name}_{self.index}", class_)
+                obj.add_data_web(t, False)
             else:
-                return None
+                continue
             sub_data.append(obj)
+            self.index += 1
         return sub_data
+
+    def to_dict(self):
+        """
+        
+        """
+        return {self.title : self.data}
 
 class DataImage(Data):
     """
@@ -107,7 +138,7 @@ class DataImage(Data):
         receives the part of the HTML corresponding to tag <img> and return the
         src attribute
         """
-        self.data[self.title] = data_img.get("src")
+        self.set_value(data_img.get("title"), data_img.get("src"))
 
 
 class DataUrl(Data):
@@ -125,7 +156,7 @@ class DataUrl(Data):
         receives the part of the HTML corresponding to tag <a> and return the
         href attribute
         """
-        self.data[self.title] = data_url.get("href")
+        self.set_value(data_url.get("title"), data_url.get("href"))
 
 
 class DataTable(Data):
@@ -138,26 +169,27 @@ class DataTable(Data):
         """
         super().__init__(title, {"tag" : "table", "class" : class_})
 
-    def set_data_web(self, table_html):
+    def add_data_web(self, table_html, with_index: bool):
         """
         Receives a <table> HTML element and parses caption, header, and body
         """
-        self._data = {}
-        self._data["caption"] = table_html.find("caption") if table_html.find("caption") else None
-        header = table_html.find("thead")
-        body = table_html.find("tbody")
-        if header:
-            tr = header.find_all("tr")
-            self._data["thead"] = [
-                [th.text.strip() for th in row.find_all("th")] for row in tr]
-            tr = body.find_all("tr")
-            self._data["tbody"] = [
-                [td.text.strip() for td in row.find_all("td")] for row in tr]
-        else:
-            rows = table_html.find_all("tr")
-            self._data["tr"] = [
-                [td.text.strip() for td in row.find_all("td")] for row in rows]
-        
+        table = pandas.read_html(str(table_html))
+        self.set_value(f"{self.title}", table)
+
+    def to_dict(self):
+        """
+        Serializes the content of the DataTable object to a dictionary,
+        converting pandas DataFrames into JSON-friendly format.
+        """
+        serialized = {}
+        for idx, df in enumerate(self.data.get(self.title, [])):
+            key = f"{self.title}_{idx}"
+            if isinstance(df, pandas.DataFrame):
+                df_clean = df.replace({numpy.nan: None, pandas.NaT: None})
+                serialized[key] = df_clean.to_dict(orient="records")
+            else:
+                serialized[key] = str(df)  # fallback, shouldn't usually happen
+        return serialized
 
 
 class DataText(Data):
@@ -176,13 +208,13 @@ class DataText(Data):
         receives the part of the HTML corresponding to the text and return the
         total text
         """
-        self.data[self.title] = data_text.get_text(strip=True)
+        self.set_value(f"{self.title}", data_text.get_text(strip=True))
 
     def add_data_text(self, text: str):
         """      
-        receive the text directly and save it
+        receive the text directly and save it, can also be None
         """
-        self.data[self.title] = text
+        self.set_value(f"{self.title}", text)
 
 
 class DataList(Data):
@@ -200,10 +232,9 @@ class DataList(Data):
         Receives an HTML <ul> or <ol> element and parses each <li> tag
         """
         self.data = {}
-        i = 0
-        for li in list_html.find_all("li"):
-            self.data[f"li{i}"] = self.extract_sub_data(li)
-            i += 1
+        self.set_value(
+            "li",
+            [li.get_text(strip=True) for li in list_html.find_all("li")])
 
 
 class DataContainer(Data):
@@ -218,8 +249,20 @@ class DataContainer(Data):
         """
         super().__init__(title, type_tag)
 
-    def add_data_web(self, container_html):
+    def add_data_web(self, container_html, filter = None):
         """
-        Receives an HTML of container and parses each sub_tag
+        Receives an HTML container and parses each sub_tag
         """
-        self.data = self.extract_sub_data(container_html)
+        extracted = self.extract_sub_data(container_html, filter)
+        if extracted:
+            key = f"{self.title}"
+            self._data[key] = extracted
+        else:
+            print(f"WARNING: Empty container data for '{self.title}' (HTML)")
+
+    def to_dict(self):
+        """
+        Converts data objects into a single dictionary to save as JSON.
+        Each entry has the title as key and its associated data as value.
+        """
+        return {k: v.data for k, v in self._data.items()}

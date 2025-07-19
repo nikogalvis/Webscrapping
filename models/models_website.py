@@ -13,7 +13,8 @@ from selenium.webdriver.firefox.options import Options as Opt_firefox
 from selenium.webdriver.chrome.options import Options as Opt_chrome
 from selenium.webdriver.edge.options import Options as Opt_edge
 
-from models_data import Data
+from models.models_data import (
+    Data, DataContainer, DataImage, DataList, DataText, DataUrl)
 
 class WebPage:
     """
@@ -89,13 +90,13 @@ class WebPage:
         self.__url = new_url
         print("The url was updated")
     
-    def create_json(self, name_json: str):
+    def create_json(self):
         """     
         Create an empty json file
         """
         folder = "data_json"
         os.makedirs(folder, exist_ok=True)
-        file_name = f"{self.__name}_{name_json}_data"
+        file_name = f"{self.__name}_data"
         path = path = f"data_json/{file_name}.json"
         with open(path, "w", encoding="utf-8") as f:
             json.dump({}, f, indent=4)
@@ -112,20 +113,55 @@ class WebPage:
         """
         self._data = {}
 
-    def save_data_in_json(self, file_name):
+    def save_data_in_json(self, file_name: str):
         """      
         Sends the data stored in self._data to a specified .json
         """
         if not os.path.exists(f"data_json/{file_name}.json"):
             raise FileNotFoundError(f"{file_name}.json not exists")
         path = f"data_json/{file_name}.json"
-        dict_data = {title : data.to_dict() for title, data in self._data.items()}
+        d = {f"text_{self.name}": []}
+        for data in self._data[f"text_{self.name}"]:
+            d[f"text_{self.name}"].append(data.to_dict())
         try:
             with open(path, "w", encoding="utf-8") as f:
-                json.dump(dict_data, f, indent=4, ensure_ascii=False)
+                json.dump(d, f, indent=4, ensure_ascii=False)
             print(f"Saved JSON at: {path}")
         except TypeError:
             print("One or more objects are not serializable.")
+
+    def load_json(self, file_name: str) -> dict:
+        """
+        Loads and returns data from a JSON file. If file doesn't exist, returns empty dict
+        """
+        path = f"data_json/{file_name}.json"
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return {}
+
+    def insert_to_json(self, file_name: str, key: str, objects: list[Data]):
+        """
+        Converts given objects to serializable form and appends them under the specified key
+        in the given JSON file
+        """
+        os.makedirs("data_json", exist_ok=True)
+        path = f"data_json/{file_name}.json"
+        # Load current data
+        data = self.load_json(file_name)
+        d = None
+        # Convert objects
+        if isinstance(objects, list):
+            d = [obj.to_dict() if hasattr(obj, "to_dict") else obj for obj in objects]
+        # Append or create
+        if key in data and isinstance(data[key], list):
+            data[key].extend(d)
+        else:
+            data[key] = d
+        # Save back to file
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+        print(f"Data appended to {path}")
 
 
 class StaticWeb(WebPage):
@@ -147,6 +183,60 @@ class StaticWeb(WebPage):
         self.html = bs
         print("The soup is ready!")
         return bs
+    
+    ###########################################################################
+    #The following methods apply for two wiki type websites which are the same on both
+    ###########################################################################
+    def extract_full_data(self):
+        """
+        Create a DataContainer object to apply the object's data retrieval
+        method and save it as data
+        """
+        obj = DataContainer(
+            f"text_{self.name}", {"tag" : "div", "class" : "mw-body-content mw-content-lt"})
+        obj.add_data_web(
+            self.container_data, self.data_extraction_filter)
+        self._data = obj._data
+
+    @staticmethod
+    def filter_in_paragraphs(tag_search):
+        """
+        filter to get only paragraphs and lists that are not related to the
+        references.
+        """
+        if tag_search.name == "p":
+            return True
+        class_ = tag_search.get("class", [])
+        if tag_search.name in ["ol", "ul"] and "reference" not in class_:
+            return True
+        return False
+
+    def extract_associated_url(self):
+        """
+        Find all URLs found in the paragraphs and lists of the useful information
+        container on the web page, excluding those related to references.
+        """
+        contain_tag = self.container_data.find_all(StaticWeb.filter_in_paragraphs)
+        urls = []
+        for tag in contain_tag:
+            for a in tag.find_all("a", href = True):
+                obj = DataUrl(a.get("title", ""), a.get("class", []))
+                obj.add_data_web(a) 
+                urls.append(obj)
+        return urls
+
+    def extract_url_Reference(self):
+        """
+        Extracts all referring URLs and creates DataUrl objects
+        """
+        contain_tag = self.container_data.find_all(["ol", "ul"], class_ = "references")
+        urls = []
+        for tag in contain_tag:
+            for a in tag.find_all("a", href = True):
+                obj = DataUrl(a.get("title", ""), a.get("class", []))
+                obj.add_data_web(a) 
+                urls.append(obj)
+        return urls
 
 class DinamicWeb(WebPage):
     """
@@ -157,7 +247,9 @@ class DinamicWeb(WebPage):
         Starts the page with a name and URL
         """
         super().__init__(name, url)
-        self.__driver = None
+        a = Opt_chrome()
+        a.add_argument("--headless")
+        self.__driver = webdriver.Chrome() #Standar browser
     
     supported_drivers = {
             "Chrome": webdriver.Chrome,
@@ -213,11 +305,13 @@ class DinamicWeb(WebPage):
         """
         Parser the HTML, and prepare "soup" for dinamic websites
         """
-        driver = self.driver()
-        driver.get(self.url)
-        time.sleep(self.load_time)
-        html = driver.page_source
-        bs = BeautifulSoup(html, "lxml")
-        print("The soup is ready!")
-        self.html = bs
-        return bs
+        try:
+            self.driver.get(self.url)
+            time.sleep(self.load_time)
+            html = self.driver.page_source
+            bs = BeautifulSoup(html, "lxml")
+            print("The soup is ready!")
+            self.html = bs
+            return bs
+        except AttributeError:
+            raise("Driver is not defined")

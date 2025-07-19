@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 import requests
 
 from models.models_website import StaticWeb
+from models.models_data import Data, DataContainer, DataUrl, DataText
 
 class Wikipedia(StaticWeb):
     """
@@ -20,7 +21,11 @@ class Wikipedia(StaticWeb):
         """
         super().__init__(name, url)
         self.__api = "https://en.wikipedia.org/w/api.php"
-    
+        self.html = self.beautiful_soup()
+        self.container_data = self.html.find(
+            "div", class_ = "mw-content-ltr mw-parser-output")
+        self.principal_title = self.html.find("h1")
+
     ## constant variables for suggested search
     type_search = "normal"
     limit_search = 7
@@ -52,10 +57,25 @@ class Wikipedia(StaticWeb):
             return None
 
     def create_url(self, word: str):
+        """
+        With the search suggestions in search suggestions() the link is generated
+        according to the option chosen by the user
+        """
         searches = self.search_suggestions(word)
         try:
             search = int(input("select a search option: ")) #Receives a number from 1 to 7
-            self.set_url(searches[search][1], "HollowKnight")
-            self.set_name(searches[search][1], "HollwKnight")
+            self.url(searches[search - 1][0])
+            self.name(searches[search - 1][1])
         except (TypeError, IndexError):
             print("Error, The URL could not be obtained")
+
+    def extract_full_data(self):
+        """
+        Create a DataContainer object to apply the object's data retrieval
+        method and save it as data
+        """
+        obj = DataContainer(
+            f"text_{self.name}", {"tag" : "div", "class" : "mw-content-ltr mw-parser-output"})
+        obj.add_data_web(
+            self.container_data, ["p", "h1", "h2", "h3", "h4", "h5", "h6", "ol", "ul", "table"])
+        self._data = obj.data

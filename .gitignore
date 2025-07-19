@@ -5,5 +5,6 @@ __pycache__/
 *.xlsx
 *.db
 *.sqlite3
+*.json
 output/
 resultados/
