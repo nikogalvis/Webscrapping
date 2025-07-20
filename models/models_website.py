@@ -8,13 +8,20 @@ import requests
 import json
 import os
 import time
-
 from selenium.webdriver.firefox.options import Options as Opt_firefox
 from selenium.webdriver.chrome.options import Options as Opt_chrome
 from selenium.webdriver.edge.options import Options as Opt_edge
 
 from models.models_data import (
     Data, DataContainer, DataImage, DataList, DataText, DataUrl)
+from config.settings import Config
+
+#Call to the general configuration container dictionary
+if not os.path.exists("config/config_program.json"):
+    config = Config()
+    config.save_config_json()
+with open("config/config_program.json", "r", encoding="utf-8") as file:
+    config_ = json.load(file)
 
 class WebPage:
     """
@@ -66,7 +73,7 @@ class WebPage:
         Get the name of the page
         """
         return self.__name
-    
+
     @name.setter
     def name(self, new_name: str):
         """
@@ -81,7 +88,7 @@ class WebPage:
         Return the name of the page
         """
         return self.__url
-    
+
     @url.setter
     def url(self, new_url: str):
         """
@@ -89,7 +96,7 @@ class WebPage:
         """
         self.__url = new_url
         print("The url was updated")
-    
+
     def create_json(self):
         """     
         Create an empty json file
@@ -113,13 +120,13 @@ class WebPage:
         """
         self._data = {}
 
-    def save_data_in_json(self, file_name: str):
+    def save_data_in_json(self):
         """      
         Sends the data stored in self._data to a specified .json
         """
-        if not os.path.exists(f"data_json/{file_name}.json"):
-            raise FileNotFoundError(f"{file_name}.json not exists")
-        path = f"data_json/{file_name}.json"
+        if not os.path.exists(f"data_json/{self.name}_data.json"):
+            raise FileNotFoundError(f"{self.name}_data.json not exists")
+        path = f"data_json/{self.name}_data.json"
         d = {f"text_{self.name}": []}
         for data in self._data[f"text_{self.name}"]:
             d[f"text_{self.name}"].append(data.to_dict())
@@ -147,18 +154,18 @@ class WebPage:
         """
         os.makedirs("data_json", exist_ok=True)
         path = f"data_json/{file_name}.json"
-        # Load current data
+        #Load current data
         data = self.load_json(file_name)
         d = None
-        # Convert objects
+        #Convert objects
         if isinstance(objects, list):
             d = [obj.to_dict() if hasattr(obj, "to_dict") else obj for obj in objects]
-        # Append or create
+        #Append or create
         if key in data and isinstance(data[key], list):
             data[key].extend(d)
         else:
             data[key] = d
-        # Save back to file
+        #Save back to file
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
         print(f"Data appended to {path}")
@@ -187,22 +194,12 @@ class StaticWeb(WebPage):
     ###########################################################################
     #The following methods apply for two wiki type websites which are the same on both
     ###########################################################################
-    def extract_full_data(self):
-        """
-        Create a DataContainer object to apply the object's data retrieval
-        method and save it as data
-        """
-        obj = DataContainer(
-            f"text_{self.name}", {"tag" : "div", "class" : "mw-body-content mw-content-lt"})
-        obj.add_data_web(
-            self.container_data, self.data_extraction_filter)
-        self._data = obj._data
 
     @staticmethod
     def filter_in_paragraphs(tag_search):
         """
         filter to get only paragraphs and lists that are not related to the
-        references.
+        references
         """
         if tag_search.name == "p":
             return True
@@ -214,7 +211,7 @@ class StaticWeb(WebPage):
     def extract_associated_url(self):
         """
         Find all URLs found in the paragraphs and lists of the useful information
-        container on the web page, excluding those related to references.
+        container on the web page, excluding those related to references
         """
         contain_tag = self.container_data.find_all(StaticWeb.filter_in_paragraphs)
         urls = []
@@ -237,6 +234,7 @@ class StaticWeb(WebPage):
                 obj.add_data_web(a) 
                 urls.append(obj)
         return urls
+    ###########################################################################
 
 class DinamicWeb(WebPage):
     """
@@ -247,15 +245,7 @@ class DinamicWeb(WebPage):
         Starts the page with a name and URL
         """
         super().__init__(name, url)
-        a = Opt_chrome()
-        a.add_argument("--headless")
         self.__driver = webdriver.Chrome() #Standar browser
-    
-    supported_drivers = {
-            "Chrome": webdriver.Chrome,
-            "Firefox": webdriver.Firefox,
-            "Edge": webdriver.Edge
-        }
 
     @property
     def driver(self):
@@ -264,21 +254,6 @@ class DinamicWeb(WebPage):
         """
         return self.__driver
 
-    @driver.setter
-    def driver(self, new_driver):
-        """
-        Change the browser driver based on the specified browser name.
-        Supported browsers: 'chrome', 'firefox', 'edge'
-        """
-        new_driver = new_driver.lower()
-        new_driver = new_driver.capitalize() #Change everything to lowercase
-        if new_driver in self.supported_drivers:
-            self.__driver = self.supported_drivers[new_driver]
-            print(f"{new_driver} driver started successfully.")
-        else:
-            print(f"Browser '{new_driver}' not supported.")
-
-
     def hide_page(self, browser):
         """
         Hide the page that is automated with .page_source
@@ -286,20 +261,14 @@ class DinamicWeb(WebPage):
         browser = browser.lower()
         if browser == "chrome":
             options = Opt_chrome()
-        elif browser == "edge":
-            options = Opt_edge()
-        elif browser == "firefox":
-            options = Opt_firefox()
-            options.headless = True
-            return options
+            options.add_argument("--headless")
         else:
             print(f"Browser '{browser}' not supported.")
             return
-        options.add_argument("--headless")
         return options
 
     #page load time
-    load_time = 10
+    load_time = config_["ml_time_sleep"]
 
     def beautiful_soup(self):
         """

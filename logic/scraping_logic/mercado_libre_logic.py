@@ -94,12 +94,12 @@ class MercadoLibre(DinamicWeb):
         products = self.ol_products.find_all("li", class_="ui-search-layout__item")
         for product in products:
             container_prod = product.find(
-                "s", class_="andes-money-amount andes-money-amount--previous andes-money-amount--cents-coma")
+                "s", class_="andes-money-amount andes-money-amount--previous andes-money-amount--cents-comma")
             price_tag = container_prod.find("span", class_="andes-money-amount__fraction") if container_prod else None
             price_obj = DataText(
                 index, {"tag": "span", "class": "andes-money-amount__fraction"}
             )
-            price_obj.add_data_text(price_tag.text.strip() if price_tag else "<<NO INFORMATION>>")
+            price_obj.add_data_text(price_tag.text.strip() if price_tag else "<<NOT APPLY >>")
             list_price_prod.append(price_obj)
             index += 1
         return list_price_prod
@@ -137,7 +137,7 @@ class MercadoLibre(DinamicWeb):
             discount_obj = DataText(
                 index, {"tag": "span", "class": "andes-money-amount__discount"}
             )
-            discount_obj.add_data_text(discount_tag.text.strip() if discount_tag else "<<NO INFORMATION>>")
+            discount_obj.add_data_text(discount_tag.text.strip() if discount_tag else "<<NOT APPLY >>")
             list_discount_info.append(discount_obj)
             index += 1
         return list_discount_info
@@ -195,3 +195,15 @@ class MercadoLibre(DinamicWeb):
             list_q_scores.append(q_score_obj)
             index += 1
         return list_q_scores
+
+    def extract_complete(self):
+        self.create_json()
+        n = f"{self.name}_data"
+        self.insert_to_json(n, "name_product", self.extract_name_product())
+        self.insert_to_json(n, "url_product", self.extract_url_product())
+        self.insert_to_json(n, "start_price_product", self.extract_start_price_product())
+        self.insert_to_json(n, "final_price_product", self.extract_final_price_product())
+        self.insert_to_json(n, "discount_info", self.extract_discount_info())
+        self.insert_to_json(n, "name_seller", self.extract_name_seller())
+        self.insert_to_json(n, "score", self.extract_score())
+        self.insert_to_json(n, "quantity_score", self.extract_quantity_score())

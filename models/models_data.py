@@ -19,14 +19,14 @@ class Data:
     @property
     def data(self):
         """
-        
+        return the data
         """
         return self._data
 
     @data.setter
     def data(self, new_data):
         """
-        
+        changes the data
         """
         self._data = new_data
 
@@ -34,7 +34,7 @@ class Data:
         """
         Set the internal data directly (used in subclasses)
         """
-        self._data = data
+        raise NotImplementedError("Method implemented by subclasses")
 
     @property
     def type(self) -> str:
@@ -49,20 +49,6 @@ class Data:
         Update the type
         """
         self.__type_tag = new_type_tag
-
-    @property
-    def data(self):
-        """
-        Return the stored data if password is correct
-        """
-        return self._data
-
-    @data.setter
-    def data(self, new_data):
-        """
-        Update the data
-        """
-        self._data = new_data
 
     def set_value(self, key, value):
         if value is not None:
@@ -119,7 +105,7 @@ class Data:
 
     def to_dict(self):
         """
-        
+        Returns the class information as a dictionary to be passed to json
         """
         return {self.title : self.data}
 

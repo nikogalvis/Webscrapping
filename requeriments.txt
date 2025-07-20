@@ -10,4 +10,3 @@ lxml
 openpyxl
 json
 os
-__pycache__/
