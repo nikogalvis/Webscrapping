@@ -4,4 +4,9 @@ selenium
 docs
 time
 reportlab
+pandas
+numpy
+lxml
 openpyxl
+json
+os

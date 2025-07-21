@@ -20,4 +20,3 @@ La documentación es una guia tanto para nosotros como para el profesor, hay q a
 Aunque es más comodo programar a la carrera, es mejor seguir las convenciones pep8, de todas formas, al "terminar", 
 tenemos que verificar que 
 nuestro proyecto cumpla con esta documentación.
-  
