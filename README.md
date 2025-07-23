@@ -85,7 +85,7 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
         - reset_data()
         - delete_data()
         + export_document(): Document
-    }
+    }        
 
     class StaticWeb {
         + add_data(new_data)
@@ -102,25 +102,35 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
         - name: str = "Wikipedia"
         - urlstr: str = "https://www.wikipedia.org/"
         + __init__(name, url)
-        + search_suggestions(word, language): list[str]
-        + create_url(): str
-        + export_document(): Document
+        + extract_full_data() -> list
+        + extract_associuted_url()
+        + extract_url_reference(self)
+        + extract_complete(self):
     }
 
     class MercadoLibre {
         - name: str = "Mercado Libre"
-        - urlstr: str = "https://www.mercadolibre.com.co/"
+        - url: str = "https://www.mercadolibre.com.co/"
         + __init__(name, url)
-        + find_data(type, name): str
-        + export_document(): Document
+        + extract_name_product()
+        + extract_url_product()
+        + extract_start_price_product()
+        + extract_final_price_product()
+        + extract_discount_info()
+        + extract_name_seller()
+        + extract_score()
+        + extract_quantity_score()
+        + extract_complete()
     }
 
     class Citizendium {
         - name: str = "Citizendium"
         - urlstr: str = "https://www.citizendium.org/"
         + __init__(name, url)
-        + create_url(): str
-        + export_document(): Document
+        + data_exctraction_filter(tag)
+        + extract_associated_url()
+        + extract_url_reference()
+        + extraction_complete()
     }
 
     class Data {
@@ -128,9 +138,9 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
         - type: str
         - data
         + __init__(title, type)
-        + add_data(data)
+        + add_data_web(data)
         + get_type(): str
-        + set_type(new_type, password): str
+        + set_type(new_type): str
         + get_type(password): str
         + set_data()
     }
@@ -159,11 +169,6 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
         + add_information(new_information)
     }
 
-    class DocumentPdf {
-        + create_document()
-        + add_information(new_information)
-    }
-
     class DocumentWord {
         + create_document()
         + add_information(new_information)
@@ -186,7 +191,6 @@ Hemos planteada inicialmente el siguiente *diagrama de clases* para nuestro codi
     Data <|-- DataTable
     Data <|-- DataText
 
-    Document <|-- DocumentPdf
     Document <|-- DocumentWord
     Document <|-- DocumentExcel
 
