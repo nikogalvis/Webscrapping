@@ -1,0 +1,9 @@
+{
+    "wp_language": "es",
+    "wp_quantity_search": 7,
+    "wp_with_urls_asocciated": true,
+    "wp_with_urls_references": true,
+    "ct_with_urls_asocciated": true,
+    "ct_with_urls_references": true,
+    "ml_time_sleep": 7
+}
