@@ -29,7 +29,7 @@ class Config():
             "wp_with_urls_references" : self.__wp_with_urls_references,
             "ct_with_urls_asocciated" : self.__ct_with_urls_asocciated,
             "ct_with_urls_references" : self.__ct_with_urls_references,
-            "ml_time_sleep" : self.__ml_time_sleep
+            "ml_time_sleep" : self.__ml_time_sleep,
         }
         return setting
 

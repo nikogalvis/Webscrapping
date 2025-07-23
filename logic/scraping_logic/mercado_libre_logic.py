@@ -20,7 +20,14 @@ class MercadoLibre(DinamicWeb):
         """
         super().__init__(name, url)
         self.html = self.beautiful_soup()
-        self.ol_products = self.html.find("ol", class_ = "ui-search-layout ui-search-layout--stack")
+        self.ol_products = (
+    self.html.find("ol", class_=lambda c: c and "ui-search-layout" in c) or
+    self.html.find("section", class_=lambda c: c and "ui-search-results" in c) or
+    self.html.find("div", class_=lambda c: c and "ui-search-results" in c)
+)
+        if self.ol_products is None:
+            print("No se encontró el contenedor de productos")
+            
 
     #Possible Market Extraction Data
     # name_data: [tag, class]
@@ -46,6 +53,8 @@ class MercadoLibre(DinamicWeb):
             list_name_prod = []
             index = 1
             products = self.ol_products.find_all("li", class_ = "ui-search-layout__item")
+            if self.ol_products == None:
+                return ("Doesn't found the container")
             for product in products:
                 name = product.find("h3", class_ = "poly-component__title-wrapper")
                 title = name.text.strip() if name else "No defined"
@@ -197,13 +206,16 @@ class MercadoLibre(DinamicWeb):
         return list_q_scores
 
     def extract_complete(self):
+        """
+        Extracts everything, and write it in a .json file
+        """
         self.create_json()
         n = f"{self.name}_data"
-        self.insert_to_json(n, "name_product", self.extract_name_product())
-        self.insert_to_json(n, "url_product", self.extract_url_product())
+        self.insert_to_json(n, "name_product", self.extract_name_product())    
         self.insert_to_json(n, "start_price_product", self.extract_start_price_product())
         self.insert_to_json(n, "final_price_product", self.extract_final_price_product())
         self.insert_to_json(n, "discount_info", self.extract_discount_info())
         self.insert_to_json(n, "name_seller", self.extract_name_seller())
         self.insert_to_json(n, "score", self.extract_score())
         self.insert_to_json(n, "quantity_score", self.extract_quantity_score())
+        self.insert_to_json(n, "url_product", self.extract_url_product())

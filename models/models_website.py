@@ -29,7 +29,7 @@ class WebPage:
     Store HTML, prepare it to the subclasses
     This can save, reset, and export data
     """
-    
+
     def __init__(self, name: str, url: str):
         """
         Starts the page with a name and URL, and create a Password
@@ -97,14 +97,18 @@ class WebPage:
         self.__url = new_url
         print("The url was updated")
 
-    def create_json(self):
+    def create_json(self, folder: str):
         """     
-        Create an empty json file
+        Create an empty JSON file inside a subfolder of 'data_json', 
+        like 'data_products' or 'data_wiki'.
         """
-        folder = "data_json"
-        os.makedirs(folder, exist_ok=True)
-        file_name = f"{self.__name}_data"
-        path = path = f"data_json/{file_name}.json"
+        base_folder = os.path.join("data_json", folder)
+        os.makedirs(base_folder, exist_ok=True)
+        file_name = f"{self.name}_data.json"
+        path = os.path.join(base_folder, file_name)
+        if os.path.exists(path):
+            print(f"El archivo ya existe en: {path}")
+            return
         with open(path, "w", encoding="utf-8") as f:
             json.dump({}, f, indent=4)
 
@@ -120,13 +124,13 @@ class WebPage:
         """
         self._data = {}
 
-    def save_data_in_json(self):
+    def save_data_in_json(self, folder: str):
         """      
         Sends the data stored in self._data to a specified .json
         """
-        if not os.path.exists(f"data_json/{self.name}_data.json"):
+        if not os.path.exists(f"data_json/{folder}/{self.name}_data.json"):
             raise FileNotFoundError(f"{self.name}_data.json not exists")
-        path = f"data_json/{self.name}_data.json"
+        path = f"data_json/{folder}/{self.name}_data.json"
         d = {f"text_{self.name}": []}
         for data in self._data[f"text_{self.name}"]:
             d[f"text_{self.name}"].append(data.to_dict())
@@ -137,38 +141,35 @@ class WebPage:
         except TypeError:
             print("One or more objects are not serializable.")
 
-    def load_json(self, file_name: str) -> dict:
+    def load_json(self, file_name: str, folder: str) -> dict:
         """
         Loads and returns data from a JSON file. If file doesn't exist, returns empty dict
         """
-        path = f"data_json/{file_name}.json"
+        path = f"data_json/{folder}/{file_name}.json"
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
                 return json.load(f)
         return {}
 
-    def insert_to_json(self, file_name: str, key: str, objects: list[Data]):
+    def insert_to_json(self, file_name: str, key: str, objects: list[Data], folder: str):
         """
         Converts given objects to serializable form and appends them under the specified key
-        in the given JSON file
+        in the given JSON file located at data_json/<folder>/<file_name>.json
         """
-        os.makedirs("data_json", exist_ok=True)
-        path = f"data_json/{file_name}.json"
-        #Load current data
-        data = self.load_json(file_name)
-        d = None
-        #Convert objects
+        base_folder = os.path.join("data_json", folder)
+        os.makedirs(base_folder, exist_ok=True)
+        path = os.path.join(base_folder, f"{file_name}.json")
+        data = self.load_json(file_name, folder)
         if isinstance(objects, list):
             d = [obj.to_dict() if hasattr(obj, "to_dict") else obj for obj in objects]
-        #Append or create
+        else:
+            d = []
         if key in data and isinstance(data[key], list):
             data[key].extend(d)
         else:
             data[key] = d
-        #Save back to file
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
-        print(f"Data appended to {path}")
 
 
 class StaticWeb(WebPage):
@@ -190,11 +191,19 @@ class StaticWeb(WebPage):
         self.html = bs
         print("The soup is ready!")
         return bs
-    
+
+    def create_json(self):
+        return super().create_json("data_wiki")
+
+    def save_data_in_json(self):
+        return super().save_data_in_json("data_wiki")
+
+    def insert_to_json(self, file_name, key, objects):
+        return super().insert_to_json(file_name, key, objects, "data_wiki")
+
     ###########################################################################
     #The following methods apply for two wiki type websites which are the same on both
     ###########################################################################
-
     @staticmethod
     def filter_in_paragraphs(tag_search):
         """
@@ -254,19 +263,6 @@ class DinamicWeb(WebPage):
         """
         return self.__driver
 
-    def hide_page(self, browser):
-        """
-        Hide the page that is automated with .page_source
-        """
-        browser = browser.lower()
-        if browser == "chrome":
-            options = Opt_chrome()
-            options.add_argument("--headless")
-        else:
-            print(f"Browser '{browser}' not supported.")
-            return
-        return options
-
     #page load time
     load_time = config_["ml_time_sleep"]
 
@@ -284,3 +280,16 @@ class DinamicWeb(WebPage):
             return bs
         except AttributeError:
             raise("Driver is not defined")
+
+    @driver.setter
+    def driver(self, new_driver):
+        self.__driver = new_driver
+
+    def create_json(self):
+        return super().create_json("data_product")
+
+    def save_data_in_json(self):
+        return super().save_data_in_json("data_product")
+
+    def insert_to_json(self, file_name, key, objects):
+        return super().insert_to_json(file_name, key, objects, "data_product")
