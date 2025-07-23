@@ -1,7 +1,0 @@
-requests
-beautifulsoup4
-selenium
-docs
-time
-reportlab
-openpyxl
