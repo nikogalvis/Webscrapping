@@ -221,5 +221,8 @@ A modo de app para computador. Método de elaboración aún no definido.
 ```
 ***(Esta muestra solo es una guia para el entendimiento y elaboración del programa y no se le debe dar demasiada importancia)***
 
+### Medio de uso
+El programa se usa por medio de la terminal de python, entregandole distintos datos que permiten la obtencion 
+
 ### **Consideraciones legales del web scraping**
 El web scraping no es ilegal por sí mismo. Sin embargo, se deben tener en cuenta los permisos que la página web que se intenta manipular otorgue, los cuales están determinados en los **términos y condiciones**. Es necesario tener cuidado con lo que se intenta scrapear, la ley 1581 de 2012, también conocida como la **Ley de protección de datos personales**, establece parámetros que se deben cumplir al momento de manipular datos privados de cualquier individuo, los cuales abarcan el consentimiento, la finalidad, y la garantía de su seguridad.
