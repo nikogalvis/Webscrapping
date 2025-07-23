@@ -5,6 +5,9 @@ __pycache__/
 *.xlsx
 *.db
 *.sqlite3
+<<<<<<< HEAD
 *.json
+=======
+>>>>>>> e9f556744d585081c41b31daf359e783a1a6aa01
 output/
 resultados/
