@@ -10,4 +10,10 @@ from config.settings import Config
 from interface import main
 
 if __name__ == "__main__":
+    #Call to the general configuration container dictionary
+    if not os.path.exists("config/config_program.json"):
+        config = Config()
+        config.save_config_json()
+    with open("config/config_program.json", "r", encoding="utf-8") as file:
+        config_ = json.load(file)
     main()

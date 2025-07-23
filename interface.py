@@ -66,6 +66,58 @@ def handle_mercado_libre():
     doc.normalize_data()
     doc.create_document(name)
 
+def handle_config():
+    while True:
+        try:
+            print("+--------------------+")
+            print("|      Options       |")
+            print("+--------------------+")
+            print("1. Wikipedia language.")
+            print("2. Wikipedia quantity search.")
+            print("3. Wikipedia with url associeted.")
+            print("4. Wikipedia with url references.")
+            print("5. Citizendium with url associeted.")
+            print("6. Citizendium with url references.")
+            print("7. Mercado libre time sleep.")
+            print("8. Exit.")
+            option = int(input("Enter an option: "))
+            if option not in range(1, 9):
+                raise IndexError
+            return option
+        except (ValueError, IndexError):
+            print("Error. Please enter a number between 1 and 5.")
+
+def config():
+    config_ = Config()
+    while True:
+        op = handle_config()
+        if op == 1:
+            lang = input("Enter Wikipedia language (e.g., 'en', 'es'): ")
+            config_.set_wp_lenguage(lang)
+        elif op == 2:
+            try:
+                quantity = int(input("Enter number of results to retrieve: "))
+                config_.set__wp_quantity_search(quantity)
+            except ValueError:
+                print("Invalid number.")
+        elif op == 3:
+            config_.set_wp_with_urls_asocciated("wikipedia")
+        elif op == 4:
+            config_.set_wp_with_urls_references("wikipedia")
+        elif op == 5:
+            config_.set_ct_with_urls_asocciated("citizendium")
+        elif op == 6:
+            config_.set_ct_with_urls_references("citizendium")
+        elif op == 7:
+            try:
+                wait_time = float(input("Enter Mercado Libre wait time (in seconds): "))
+                config_.set_ml_time_sleep(wait_time)
+            except ValueError:
+                print("Invalid time format.")
+        elif op == 8:
+            print("Exiting configuration...")
+            return
+
 def main():
     while True:
         option = main_menu()
@@ -76,8 +128,7 @@ def main():
         elif option == 3:
             handle_mercado_libre()
         elif option == 4:
-            config = Config()
-            config.modify_config()
+            config()
         elif option == 5:
             print("Exiting program...")
             sys.exit()
