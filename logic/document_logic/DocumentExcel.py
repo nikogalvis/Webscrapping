@@ -74,7 +74,7 @@ class DocumentExcel(Documents):
     header_font = Font(bold=True, size=12)
     center_alignment = Alignment(horizontal="center", vertical="center")
 
-    for col_num in enumerate(heads, start=1):
+    for col_num, _ in enumerate(heads, start=1):
         cell = page.cell(row=1, column=col_num)
         cell.font = header_font
         cell.alignment = center_alignment
