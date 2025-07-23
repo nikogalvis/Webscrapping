@@ -1,7 +1,7 @@
 requests
 beautifulsoup4
 selenium
-docs
+docx
 time
 pandas
 numpy

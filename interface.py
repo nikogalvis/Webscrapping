@@ -9,6 +9,7 @@ from logic.scraping_logic.mercado_libre_logic import MercadoLibre
 from models.models_website import StaticWeb, DinamicWeb
 from logic.document_logic.DocumentExcel import DocumentExcel
 from config.settings import Config
+from logic.document_logic.DocumentWord import WordDocument
 
 def main_menu():
     while True:
@@ -49,12 +50,16 @@ def handle_wikipedia():
     url = create_url(name) if choice == 1 else input("Enter Wikipedia URL: ")
     wiki = Wikipedia(name, url)
     wiki.extraction_complete()
+    doc = WordDocument(wiki)
+    doc.generate()
 
 def handle_citizendium():
     name = input("Enter search term: ")
     url = input("Enter Citizendium URL: ")
     citi = Citizendium(name, url)
     citi.extraction_complete()
+    doc = WordDocument(citi)
+    doc.generate()
 
 def handle_mercado_libre():
     name = input("Enter product: ")
